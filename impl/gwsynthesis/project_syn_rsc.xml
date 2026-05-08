@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module name="top" Lut="49" T_Register="456(0)" T_Alu="188(0)" T_Lut="1240(49)" T_Bsram="6(0)">
+ <SubModule name="cpu" Register="442" Alu="188" Lut="1182" Bsram="2" T_Register="442(442)" T_Alu="188(188)" T_Lut="1182(1182)" T_Bsram="2(2)"/>
+ <SubModule name="mem_inst" Register="1" Lut="1" Bsram="4" T_Register="1(1)" T_Lut="1(1)" T_Bsram="4(4)"/>
+ <SubModule name="gpio_inst" Register="13" Lut="8" T_Register="13(13)" T_Lut="8(8)"/>
+</Module>

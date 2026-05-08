@@ -1,0 +1,26 @@
+/*
+ * Tang Nano 9K constraints for PicoRV32 SoC
+ */
+
+// Clock
+IO_LOC "clk_27mhz" 52;
+IO_PORT "clk_27mhz" PULL_MODE=UP;
+
+// Reset Button (S1)
+IO_LOC "btn_reset" 3;
+IO_PORT "btn_reset" PULL_MODE=UP;
+
+
+// 6 Onboard LEDs (Active Low)
+IO_LOC "led[5]" 16;
+IO_PORT "led[5]" PULL_MODE=UP DRIVE=8;
+IO_LOC "led[4]" 15;
+IO_PORT "led[4]" PULL_MODE=UP DRIVE=8;
+IO_LOC "led[3]" 14;
+IO_PORT "led[3]" PULL_MODE=UP DRIVE=8;
+IO_LOC "led[2]" 13;
+IO_PORT "led[2]" PULL_MODE=UP DRIVE=8;
+IO_LOC "led[1]" 11;
+IO_PORT "led[1]" PULL_MODE=UP DRIVE=8;
+IO_LOC "led[0]" 10;
+IO_PORT "led[0]" PULL_MODE=UP DRIVE=8;
