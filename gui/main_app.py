@@ -4,6 +4,8 @@ import webbrowser
 import os
 import subprocess
 import socket
+import shutil
+import sys
 from app import app
 
 def is_port_in_use(port):
@@ -24,23 +26,29 @@ def launch_browser():
     
     # Try to launch in "App Mode" (Chromium/Chrome)
     # This removes the browser UI (tabs, address bar) making it feel like an app
-    app_modes = [
-        ["google-chrome", "--app=" + url],
-        ["chromium", "--app=" + url],
-        ["chromium-browser", "--app=" + url],
-        ["microsoft-edge", "--app=" + url]
-    ]
+    if sys.platform == "win32":
+        app_modes = [
+            ["chrome.exe", "--app=" + url],
+            ["msedge.exe", "--app=" + url],
+            ["brave.exe", "--app=" + url]
+        ]
+    else:
+        app_modes = [
+            ["google-chrome", "--app=" + url],
+            ["chromium", "--app=" + url],
+            ["chromium-browser", "--app=" + url],
+            ["microsoft-edge", "--app=" + url]
+        ]
     
     success = False
     for cmd in app_modes:
-        try:
-            # Check if command exists
-            subprocess.Popen(["which", cmd[0]], stdout=subprocess.PIPE).wait()
-            subprocess.Popen(cmd)
-            success = True
-            break
-        except:
-            continue
+        if shutil.which(cmd[0]):
+            try:
+                subprocess.Popen(cmd)
+                success = True
+                break
+            except:
+                continue
             
     if not success:
         # Fallback to default browser

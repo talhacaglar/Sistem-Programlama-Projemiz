@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__, 
@@ -9,6 +10,13 @@ app = Flask(__name__,
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, 'output')
 GUI_DIR = os.path.join(PROJECT_ROOT, 'gui')
+
+# Platform specific binary names
+ASM_BIN = "./assembler_bin"
+LNK_BIN = "./linker_bin"
+if sys.platform == "win32":
+    ASM_BIN = "assembler_bin.exe"
+    LNK_BIN = "linker_bin.exe"
 
 @app.route('/')
 def index():
@@ -25,8 +33,8 @@ def build():
         f.write(code)
     
     # Assembler
-    asm_cmd = ["./assembler_bin", "gui/temp_main.s"]
-    res_asm = subprocess.run(asm_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+    asm_cmd = [ASM_BIN, "gui/temp_main.s"]
+    res_asm = subprocess.run(asm_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, shell=(sys.platform == "win32"))
     log = res_asm.stdout + res_asm.stderr
     
     if res_asm.returncode != 0:
@@ -34,14 +42,14 @@ def build():
     
     # Linker
     lnk_cmd = [
-        "./linker_bin", 
+        LNK_BIN, 
         "gui/temp_main.o", 
         "-o", "output/temp_out", 
         "--text-base", "00000000", 
         "--data-base", "00000300", 
         "--stack-top", "00000400"
     ]
-    res_lnk = subprocess.run(lnk_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+    res_lnk = subprocess.run(lnk_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, shell=(sys.platform == "win32"))
     log += "\n" + res_lnk.stdout + res_lnk.stderr
     
     if res_lnk.returncode != 0:
