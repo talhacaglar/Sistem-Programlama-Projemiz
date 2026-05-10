@@ -7,7 +7,7 @@ OUT_DIR = ROOT / "fpga" / "mem"
 TEXT_OUT = OUT_DIR / "firmware_text.mem"
 DATA_OUT = OUT_DIR / "firmware_data.mem"
 
-DATA_WORD_BASE = 0x00010000 // 4
+DATA_WORD_BASE = 0xFFFFFFFF // 4
 
 
 def parse_words(path):

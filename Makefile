@@ -25,8 +25,8 @@ build: all
 	../linker_bin main.o utils.o \
 		-o ../$(OUTDIR)/knight_rider \
 		--text-base 00000000 \
-		--data-base 00010000 \
-		--stack-top 00020000
+		--data-base 00000300 \
+		--stack-top 00000400
 	@echo ""
 	@echo "=== Cikti dosyalari ==="
 	@cat $(OUTDIR)/knight_rider.map

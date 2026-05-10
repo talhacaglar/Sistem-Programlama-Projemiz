@@ -1,0 +1,104 @@
+[
+ {
+  "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+  "InstLine" : 2174,
+  "InstName" : "picorv32_regs",
+  "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+  "ModuleLine" : 2174,
+  "ModuleName" : "picorv32_regs"
+ },
+ {
+  "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+  "InstLine" : 2517,
+  "InstName" : "picorv32_axi",
+  "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+  "ModuleLine" : 2517,
+  "ModuleName" : "picorv32_axi",
+  "SubInsts" : [
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+    "InstLine" : 2619,
+    "InstName" : "axi_adapter",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+    "ModuleLine" : 2731,
+    "ModuleName" : "picorv32_axi_adapter"
+   },
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+    "InstLine" : 2674,
+    "InstName" : "picorv32_core",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+    "ModuleLine" : 62,
+    "ModuleName" : "picorv32"
+   }
+  ]
+ },
+ {
+  "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+  "InstLine" : 2815,
+  "InstName" : "picorv32_wb",
+  "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+  "ModuleLine" : 2815,
+  "ModuleName" : "picorv32_wb",
+  "SubInsts" : [
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+    "InstLine" : 2938,
+    "InstName" : "picorv32_core",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+    "ModuleLine" : 62,
+    "ModuleName" : "picorv32"
+   }
+  ]
+ },
+ {
+  "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/top.v",
+  "InstLine" : 1,
+  "InstName" : "top",
+  "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/top.v",
+  "ModuleLine" : 1,
+  "ModuleName" : "top",
+  "SubInsts" : [
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/top.v",
+    "InstLine" : 71,
+    "InstName" : "cpu",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/picorv32.v",
+    "ModuleLine" : 62,
+    "ModuleName" : "picorv32"
+   },
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/top.v",
+    "InstLine" : 87,
+    "InstName" : "text_ram",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/simple_ram.v",
+    "ModuleLine" : 1,
+    "ModuleName" : "simple_ram"
+   },
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/top.v",
+    "InstLine" : 101,
+    "InstName" : "data_ram",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/simple_ram.v",
+    "ModuleLine" : 1,
+    "ModuleName" : "simple_ram"
+   },
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/top.v",
+    "InstLine" : 111,
+    "InstName" : "gpio_inst",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/gpio_led.v",
+    "ModuleLine" : 1,
+    "ModuleName" : "gpio_led"
+   },
+   {
+    "InstFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/top.v",
+    "InstLine" : 122,
+    "InstName" : "uart_inst",
+    "ModuleFile" : "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/uart_tx.v",
+    "ModuleLine" : 1,
+    "ModuleName" : "uart_tx"
+   }
+  ]
+ }
+]

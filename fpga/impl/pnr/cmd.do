@@ -1,0 +1,16 @@
+-d /home/clar/Sistem_Programlama_Proje/son_proje/fpga/impl/gwsynthesis/rv32i_tangnano9k.vg
+-p GW1NR-9-QFN88-6
+-pn GW1NR-LV9QN88C6/I5
+-cst /home/clar/Sistem_Programlama_Proje/son_proje/fpga/src/tangnano9k.cst
+-cfg /home/clar/Sistem_Programlama_Proje/son_proje/fpga/impl/pnr/device.cfg
+-bit
+-tr
+-ph
+-timing
+-cst_error
+-place_option 0
+-route_option 0
+-clock_route_order 0
+-correct_hold 1
+-route_maxfan 23
+-global_freq 50.000

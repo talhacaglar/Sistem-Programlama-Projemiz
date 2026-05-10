@@ -38,8 +38,8 @@ def build():
         "gui/temp_main.o", 
         "-o", "output/temp_out", 
         "--text-base", "00000000", 
-        "--data-base", "00010000", 
-        "--stack-top", "00020000"
+        "--data-base", "00000300", 
+        "--stack-top", "00000400"
     ]
     res_lnk = subprocess.run(lnk_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
     log += "\n" + res_lnk.stdout + res_lnk.stderr

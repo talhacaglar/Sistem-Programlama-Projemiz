@@ -1,6 +1,6 @@
 module simple_ram #(
     parameter WORDS = 2048,
-    parameter INIT_FILE = "",
+    parameter INIT_FILE = "/home/clar/Sistem_Programlama_Proje/son_proje/output/knight_rider.mem",
     parameter INIT_VALUE = 32'h00000000
 ) (
     input  wire clk,
@@ -15,13 +15,15 @@ module simple_ram #(
     integer i;
     reg [31:0] mem [0:WORDS-1];
 
-    initial begin
-        for (i = 0; i < WORDS; i = i + 1)
-            mem[i] = INIT_VALUE;
+ initial begin
+    // Gereksiz for döngüsünü sildik çünkü BRAM varsayılan olarak sıfırdır
+    // ve 2000 limitini aşıyordu.
 
-        if (INIT_FILE != "")
-            $readmemh(INIT_FILE, mem);
+    if (INIT_FILE != "") begin
+        $display("Loading RAM from %s", INIT_FILE);
+        $readmemh(INIT_FILE, mem);
     end
+end
 
     always @(posedge clk) begin
         ready <= 1'b0;
