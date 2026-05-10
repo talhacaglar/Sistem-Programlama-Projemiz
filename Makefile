@@ -1,59 +1,42 @@
-CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -Wpedantic -O2 -Iinclude
+# Makefile - RV32I Assembler + Linker
+# Kullanim: make all
 
-# Common object files (shared between assembler and linker)
-COMMON_OBJ = src/utils.o src/objfile.o src/hex_writer.o
+CC      = gcc
+CFLAGS  = -Wall -Wextra -O2 -std=c99 -I src/common -I src/assembler -I src/linker
+OUTDIR  = output
 
-# Assembler
-ASM_OBJ = src/assembler.o src/parser.o src/opcodes.o src/main.o $(COMMON_OBJ)
-ASM_TARGET = build/picorv32asm
+ASM_SRCS = src/common/utils.c src/assembler/encoder.c src/assembler/parser.c src/assembler/main.c
+LNK_SRCS = src/linker/core.c src/linker/parser.c src/linker/relocator.c src/linker/writer.c src/linker/main.c
 
-# Linker
-LINK_OBJ = src/linker.o src/linker_script.o src/linker_main.o $(COMMON_OBJ)
-LINK_TARGET = build/picorv32link
+all: assembler linker
 
-all: $(ASM_TARGET) $(LINK_TARGET)
+assembler: $(ASM_SRCS)
+	$(CC) $(CFLAGS) -o assembler_bin $(ASM_SRCS)
+	@echo "[OK] assembler derlendi"
 
-$(ASM_TARGET): $(ASM_OBJ) | build
-	$(CC) $(CFLAGS) -o $@ $(ASM_OBJ)
+linker: $(LNK_SRCS)
+	$(CC) $(CFLAGS) -o linker_bin $(LNK_SRCS)
+	@echo "[OK] linker derlendi"
 
-$(LINK_TARGET): $(LINK_OBJ) | build
-	$(CC) $(CFLAGS) -o $@ $(LINK_OBJ)
+build: all
+	@mkdir -p $(OUTDIR)
+	@cd test_programs && \
+	../assembler_bin main.s utils.s && \
+	../linker_bin main.o utils.o \
+		-o ../$(OUTDIR)/knight_rider \
+		--text-base 00000000 \
+		--data-base 00010000 \
+		--stack-top 00020000
+	@echo ""
+	@echo "=== Cikti dosyalari ==="
+	@cat $(OUTDIR)/knight_rider.map
 
-build:
-	mkdir -p build
-
-src/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+test: all
+	python3 tests/run_tests.py
 
 clean:
-	rm -f src/*.o build/*
+	rm -f assembler_bin linker_bin
+	rm -f test_programs/*.o tests/test_programs/*.o gui/temp_main.o
+	@if [ -d "$(OUTDIR)" ]; then find "$(OUTDIR)" -type f -delete; fi
 
-# ---- Demo: multi-file assemble + link for Tang Nano 9K ----
-demo: $(ASM_TARGET) $(LINK_TARGET)
-	@echo "=== Assembling test files ==="
-	./$(ASM_TARGET) -c tests/linker/main.s -o build/main.o
-	./$(ASM_TARGET) -c tests/linker/led.s -o build/led.o
-	./$(ASM_TARGET) -c tests/linker/utils.s -o build/utils.o
-	@echo ""
-	@echo "=== Dumping object files ==="
-	./$(ASM_TARGET) --dump build/main.o
-	@echo ""
-	./$(ASM_TARGET) --dump build/led.o
-	@echo ""
-	./$(ASM_TARGET) --dump build/utils.o
-	@echo ""
-	@echo "=== Linking ==="
-	./$(LINK_TARGET) -T tests/linker/tangnano9k.ld -o build/firmware.hex build/main.o build/led.o build/utils.o
-	@echo ""
-	@echo "=== Converting for FPGA ==="
-	python3 fpga/scripts/hex2mem.py build/firmware.hex fpga/mem/firmware.hex
-	@echo "Done!"
-
-# ---- Legacy single-file test ----
-test: $(ASM_TARGET)
-	./$(ASM_TARGET) tests/test1_counter.s build/test1.hex build/test1.lst
-	./$(ASM_TARGET) tests/test2_memory.s build/test2.hex
-	./$(ASM_TARGET) tests/test3_call.s build/test3.hex
-
-.PHONY: all clean demo test
+.PHONY: all assembler linker build test clean

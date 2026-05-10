@@ -1,74 +1,127 @@
-# PicoRV32 RV32I Assembler (C99)
+# RV32I Assembler + Linker (C implementasyonu)
+# PicoRV32 uyumlu
 
-Bu proje, PicoRV32 üzerinde kullanılabilecek RV32I alt kümesi için iki geçişli (two-pass) bir assembler gerçekleştirir.
+## Proje Yapisi
 
-## Özellikler
-
-- C99 ile yazılmış modüler yapı
-- Two-pass assembler mimarisi
-- Desteklenen formatlar: R, I, S, B, U, J
-- Ek sistem komutları: `ecall`, `ebreak`
-- Desteklenen direktifler: `.text`, `.data`, `.word`, `.byte`, `.org`, `.end`
-- Çıktı formatı: Intel HEX
-- İsteğe bağlı listing (`.lst`) üretimi
-- Register isimleri: `x0..x31` ve ABI alias'ları (`zero`, `ra`, `sp`, `a0` vb.)
-- İfadeler: sayı, karakter literal'i, `label`, `label+imm`, `label-imm`
-
-## Desteklenen komutlar
-
-### R-type
-`add sub sll slt sltu xor srl sra or and`
-
-### I-type
-`addi slti sltiu xori ori andi slli srli srai`
-
-### Load/JALR
-`lb lh lw lbu lhu jalr`
-
-### S-type
-`sb sh sw`
-
-### B-type
-`beq bne blt bge bltu bgeu`
-
-### U-type
-`lui auipc`
-
-### J-type
-`jal`
-
-### System
-`ecall ebreak`
-
-## Derleme
-
-```bash
-make
+```
+rv32i_c/
+├── src/
+│   ├── assembler/       # Assembler parser/encoder/main
+│   ├── linker/          # Linker parser/relocator/writer/main
+│   └── common/          # Ortak yardimci fonksiyonlar
+├── tests/
+│   ├── run_tests.py
+│   └── test_programs/   # Otomatik test assembly dosyalari
+├── test_programs/
+│   ├── main.s           # Knight Rider ana program (_start)
+│   └── utils.s          # Delay fonksiyonu + .data bolumu
+├── gui/                 # Flask tabanli web arayuzu
+├── output/              # Uretilen dosyalar
+│   ├── knight_rider.hex
+│   ├── knight_rider.mem
+│   ├── knight_rider.bin
+│   └── knight_rider.map
+├── Makefile
+├── build.sh
+├── requirements.txt
+└── README.md
 ```
 
-## Kullanım
+## Tek Komutla Build
 
 ```bash
-./build/picorv32asm input.s output.hex [listing.lst]
+bash build.sh
 ```
 
-Örnek:
+## Manuel Kullanim
 
 ```bash
-./build/picorv32asm tests/test1_counter.s build/test1.hex build/test1.lst
+# Derle
+make all
+
+# Assemble
+cd test_programs
+../assembler_bin main.s utils.s
+
+# Link
+../linker_bin main.o utils.o \
+    -o ../output/knight_rider \
+    --text-base 00000000 \
+    --data-base 00010000 \
+    --stack-top 00020000
 ```
 
-## Dizin yapısı
+## Test
 
-- `include/` : başlık dosyaları
-- `src/` : kaynak kodlar
-- `tests/` : örnek test assembly programları
-- `build/` : derlenmiş ikili ve test çıktıları
+```bash
+make all
+python3 tests/run_tests.py
+```
 
-## Tasarım notları
+Testler assembler/linker cikis durumuna ek olarak string direktiflerini,
+`.data` yerlesimini ve ABS32 data relocation sonucunu da kontrol eder.
 
-- Pass 1 aşamasında satırlar ayrıştırılır, adresler atanır ve label'lar sembol tablosuna yerleştirilir.
-- Pass 2 aşamasında komutlar 32-bit makine koduna çevrilir ve bellek imgesi oluşturulur.
-- Sembol tablosu açık adreslemeli hash tablo olarak gerçekleştirilmiştir.
-- Opcode tablosu sabit ve küçük olduğu için salt-okunur statik dizi yapısı kullanılmıştır.
-- Bellek çıktısı little-endian olarak Intel HEX kaydına dönüştürülür.
+## GUI
+
+```bash
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt
+./venv/bin/python gui/app.py
+```
+
+## Desteklenen Komutlar (RV32I)
+
+R-type : add, sub, sll, slt, sltu, xor, srl, sra, or, and
+I-type : addi, slti, sltiu, xori, ori, andi, slli, srli, srai
+Load   : lw, lh, lb, lhu, lbu
+Store  : sw, sh, sb
+Branch : beq, bne, blt, bge, bltu, bgeu
+Upper  : lui, auipc
+Jump   : jal, jalr
+System : ecall, ebreak, fence
+Pseudo : nop, li, mv, la, call, ret, j, not, neg,
+         beqz, bnez, blez, bgez, bltz, bgtz, seqz, snez
+
+## Object Dosya Formati (.o)
+
+JSON formatinda, su alanlari icerir:
+- filename  : kaynak dosya adi
+- text      : 32-bit instruction kelimeleri (uint dizisi)
+- data      : data bolumu (byte dizisi)
+- symbols   : sembol tablosu {isim: {section, offset, global}}
+- relocations : relocation kayitlari
+- globals   : global sembol isimleri
+
+## Relocation Tipleri
+
+BRANCH     : B-type PC-relative dal
+JAL        : J-type PC-relative atlama
+CALL       : auipc+jalr cifti (call pseudo)
+LA         : auipc+addi cifti (la pseudo)
+LI         : lui+addi cifti (buyuk sabite)
+HI20       : U-type upper 20 bit
+LO12       : I-type lower 12 bit
+PCREL_HI20 : auipc icin upper 20 bit
+ABS32      : data section'da 32-bit mutlak adres
+
+## Bellek Haritasi (PicoRV32)
+
+0x00000000 - 0x0000FFFF : TEXT (BRAM, program kodu)
+0x00010000 - 0x0001FFFF : DATA/BSS (RAM)
+0x00020000              : STACK_TOP
+0x10000000              : GPIO / LED (memory-mapped)
+
+## FPGA Yukleme
+
+knight_rider.mem dosyasini Verilog'da kullan:
+
+```verilog
+reg [31:0] bram [0:16383]; // 64KB BRAM
+initial $readmemh("knight_rider.mem", bram);
+```
+
+`.mem` dosyasi `$readmemh` adres direktifleri (`@...`) kullanarak TEXT ve
+DATA bolumlerini ilgili word adreslerine yerlestirir.
+
+LED GPIO yazmaci 0x10000000 adresinde,
+main.s'deki `sw t2, 0(t1)` komutuyla yazilir.

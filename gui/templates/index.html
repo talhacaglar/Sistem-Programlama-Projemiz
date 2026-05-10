@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicoRV32 IDE - Assembler & Linker</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-mesh"></div>
+    
+    <div class="app-container">
+        <header class="glass-panel">
+            <div class="logo">
+                <i class="fa-solid fa-microchip"></i>
+                <h1>PicoRV32 <span>Studio</span></h1>
+            </div>
+            <div class="controls">
+                <select id="scenarioSelect" class="glass-select">
+                    <option value="">-- Test Senaryosu Sec --</option>
+                    <option value="blink">LED Blink (0x10000000)</option>
+                    <option value="fibonacci">Fibonacci (RAM)</option>
+                    <option value="uart">UART TX Test</option>
+                </select>
+                <button id="buildBtn" class="btn btn-primary"><i class="fa-solid fa-play"></i> Build & Link</button>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="editor-pane glass-panel">
+                <div class="pane-header">
+                    <h2><i class="fa-solid fa-code"></i> Assembly Editor</h2>
+                    <button id="clearBtn" class="btn btn-icon"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div class="editor-container">
+                    <textarea id="codeEditor" spellcheck="false" placeholder="Write your RV32I assembly code here...">
+.text
+.global _start
+_start:
+    li t0, 0x10000000   # GPIO LED Adresi
+    li t1, 0x01         # LED Durumu
+loop:
+    sw t1, 0(t0)        # LED'i yak/sondur
+    not t1, t1          # Durumu tersine cevir
+    li t2, 100000       # Gecikme
+delay:
+    addi t2, t2, -1
+    bnez t2, delay
+    j loop
+</textarea>
+                </div>
+            </section>
+
+            <section class="output-pane glass-panel">
+                <div class="pane-header">
+                    <div class="tabs">
+                        <button class="tab active" data-target="terminal"><i class="fa-solid fa-terminal"></i> Terminal</button>
+                        <button class="tab" data-target="hex"><i class="fa-solid fa-file-code"></i> HEX</button>
+                        <button class="tab" data-target="mem"><i class="fa-solid fa-memory"></i> MEM</button>
+                        <button class="tab" data-target="map"><i class="fa-solid fa-map"></i> MAP</button>
+                    </div>
+                </div>
+                <div class="tab-content-container">
+                    <pre id="terminal" class="tab-content active code-block log-output">Ready to build.</pre>
+                    <pre id="hex" class="tab-content code-block"></pre>
+                    <pre id="mem" class="tab-content code-block"></pre>
+                    <pre id="map" class="tab-content code-block"></pre>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>

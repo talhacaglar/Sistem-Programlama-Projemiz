@@ -1,0 +1,15 @@
+# Build outputs
+assembler_bin
+linker_bin
+*.o
+output/
+
+# Python/runtime artifacts
+venv/
+__pycache__/
+*.py[cod]
+
+# Local helper/downloaded files
+get-pip.py
+gui/temp_main.s
+gui/temp_main.o

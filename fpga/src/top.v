@@ -1,13 +1,17 @@
 module top (
     input  wire clk_27mhz,
     input  wire btn_reset,
-    output wire [5:0] led
+    output wire [5:0] led,
+    output wire uart_tx_pin
 );
 
-    // Active high reset
+    localparam TEXT_WORDS = 2048;
+    localparam DATA_WORDS = 2048;
+    localparam TEXT_INIT = "/home/clar/Sistem Programlama Proje/rv32i_c/fpga/mem/firmware_text.mem";
+    localparam DATA_INIT = "/home/clar/Sistem Programlama Proje/rv32i_c/fpga/mem/firmware_data.mem";
+
     wire reset = ~btn_reset;
 
-    // PicoRV32 memory interface
     wire mem_valid;
     wire mem_instr;
     wire mem_ready;
@@ -16,28 +20,33 @@ module top (
     wire [3:0]  mem_wstrb;
     wire [31:0] mem_rdata;
 
-    // Address decoding
-    // BRAM: 0x00000000 - 0x00001FFF (8KB)
-    wire sel_bram = (mem_addr[31:28] == 4'h0);
-    // GPIO: 0x80000000
-    wire sel_gpio = (mem_addr == 32'h80000000);
+    wire sel_text = (mem_addr[31:16] == 16'h0000) && (mem_addr[12:2] < TEXT_WORDS);
+    wire sel_data = (mem_addr[31:16] == 16'h0001);
+    wire sel_gpio = (mem_addr == 32'h1000_0000);
+    wire sel_uart = (mem_addr[31:4] == 28'h2000_000);
 
-    // Slave ready signals
-    wire bram_ready;
+    wire text_ready;
+    wire data_ready;
     wire gpio_ready;
-
-    // Slave read data
-    wire [31:0] bram_rdata;
+    wire uart_ready;
+    wire [31:0] text_rdata;
+    wire [31:0] data_rdata;
     wire [31:0] gpio_rdata;
+    wire [31:0] uart_rdata;
+    wire unmapped_ready = mem_valid && !(sel_text || sel_data || sel_gpio || sel_uart);
 
-    // Mux ready and rdata back to CPU
-    assign mem_ready = (sel_bram & bram_ready) | 
-                       (sel_gpio & gpio_ready);
-                       
-    assign mem_rdata = (sel_bram) ? bram_rdata :
-                       (sel_gpio) ? gpio_rdata : 32'h0;
+    assign mem_ready = (sel_text && text_ready) ||
+                       (sel_data && data_ready) ||
+                       (sel_gpio && gpio_ready) ||
+                       (sel_uart && uart_ready) ||
+                       unmapped_ready;
 
-    // Instantiate PicoRV32
+    assign mem_rdata = sel_text ? text_rdata :
+                       sel_data ? data_rdata :
+                       sel_gpio ? gpio_rdata :
+                       sel_uart ? uart_rdata :
+                       32'h00000000;
+
     picorv32 #(
         .ENABLE_COUNTERS(0),
         .ENABLE_COUNTERS64(0),
@@ -58,7 +67,7 @@ module top (
         .ENABLE_IRQ_QREGS(0),
         .ENABLE_IRQ_TIMER(0),
         .PROGADDR_RESET(32'h0000_0000),
-        .STACKADDR(32'h0000_2000)
+        .STACKADDR(32'h0002_0000)
     ) cpu (
         .clk(clk_27mhz),
         .resetn(~reset),
@@ -71,25 +80,38 @@ module top (
         .mem_rdata(mem_rdata)
     );
 
-    // Instantiate BRAM (8KB = 2048 words)
-    bram #(
-        .WORDS(2048),
-        .INIT_FILE("/home/clar/Sistem Programlama Proje/picorv32_assembler_project_bundle_v2/picorv32_assembler_project/fpga/mem/firmware.hex")
-    ) mem_inst (
+    simple_ram #(
+        .WORDS(TEXT_WORDS),
+        .INIT_FILE(TEXT_INIT),
+        .INIT_VALUE(32'h00000013)
+    ) text_ram (
         .clk(clk_27mhz),
-        .valid(mem_valid & sel_bram),
+        .valid(mem_valid && sel_text),
         .wstrb(mem_wstrb),
         .addr(mem_addr[12:2]),
         .wdata(mem_wdata),
-        .rdata(bram_rdata),
-        .ready(bram_ready)
+        .rdata(text_rdata),
+        .ready(text_ready)
     );
 
-    // Instantiate GPIO LED
+    simple_ram #(
+        .WORDS(DATA_WORDS),
+        .INIT_FILE(DATA_INIT),
+        .INIT_VALUE(32'h00000000)
+    ) data_ram (
+        .clk(clk_27mhz),
+        .valid(mem_valid && sel_data),
+        .wstrb(mem_wstrb),
+        .addr(mem_addr[12:2]),
+        .wdata(mem_wdata),
+        .rdata(data_rdata),
+        .ready(data_ready)
+    );
+
     gpio_led gpio_inst (
         .clk(clk_27mhz),
         .reset(reset),
-        .valid(mem_valid & sel_gpio),
+        .valid(mem_valid && sel_gpio),
         .wstrb(mem_wstrb),
         .wdata(mem_wdata),
         .rdata(gpio_rdata),
@@ -97,5 +119,16 @@ module top (
         .led_out(led)
     );
 
+    uart_tx uart_inst (
+        .clk(clk_27mhz),
+        .reset(reset),
+        .valid(mem_valid && sel_uart),
+        .addr(mem_addr[3:0]),
+        .wstrb(mem_wstrb),
+        .wdata(mem_wdata),
+        .rdata(uart_rdata),
+        .ready(uart_ready),
+        .tx(uart_tx_pin)
+    );
 
 endmodule
