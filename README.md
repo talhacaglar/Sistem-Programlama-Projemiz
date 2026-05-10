@@ -33,7 +33,7 @@ rv32i_c/
 bash build.sh
 ```
 
-## Manuel Kullanim
+## Manuel Kullanım
 
 ```bash
 # Derle
