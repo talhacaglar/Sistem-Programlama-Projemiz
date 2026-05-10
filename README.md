@@ -121,7 +121,7 @@ initial $readmemh("knight_rider.mem", bram);
 ```
 
 `.mem` dosyasi `$readmemh` adres direktifleri (`@...`) kullanarak TEXT ve
-DATA bolumlerini ilgili word adreslerine yerlestirir.
+DATA bolumlerini ilgili word adreslerine yerlestirilir.
 
 LED GPIO yazmaci 0x10000000 adresinde,
 main.s'deki `sw t2, 0(t1)` komutuyla yazilir.
