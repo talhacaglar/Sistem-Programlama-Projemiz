@@ -3,6 +3,7 @@ assembler_bin
 linker_bin
 *.o
 output/
+!output/*.mem
 
 # Python/runtime artifacts
 venv/

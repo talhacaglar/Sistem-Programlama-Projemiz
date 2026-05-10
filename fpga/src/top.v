@@ -7,8 +7,8 @@ module top (
 
     localparam TEXT_WORDS = 2048;
     localparam DATA_WORDS = 2048;
-    localparam TEXT_INIT = "/home/clar/Sistem Programlama Proje/rv32i_c/fpga/mem/firmware_text.mem";
-    localparam DATA_INIT = "/home/clar/Sistem Programlama Proje/rv32i_c/fpga/mem/firmware_data.mem";
+    localparam TEXT_INIT = "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/mem/firmware_text.mem";
+    localparam DATA_INIT = "/home/clar/Sistem_Programlama_Proje/son_proje/fpga/mem/firmware_data.mem";
 
     wire reset = ~btn_reset;
 
