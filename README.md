@@ -1,127 +1,53 @@
-# RV32I Assembler + Linker (C implementasyonu)
-# PicoRV32 uyumlu
+# RV32I Assembler & Linker
 
-## Proje Yapisi
+[English](#english) · [Türkçe](#türkçe)
 
-```
-rv32i_c/
-├── src/
-│   ├── assembler/       # Assembler parser/encoder/main
-│   ├── linker/          # Linker parser/relocator/writer/main
-│   └── common/          # Ortak yardimci fonksiyonlar
-├── tests/
-│   ├── run_tests.py
-│   └── test_programs/   # Otomatik test assembly dosyalari
-├── test_programs/
-│   ├── main.s           # Knight Rider ana program (_start)
-│   └── utils.s          # Delay fonksiyonu + .data bolumu
-├── gui/                 # Flask tabanli web arayuzu
-├── output/              # Uretilen dosyalar
-│   ├── knight_rider.hex
-│   ├── knight_rider.mem
-│   ├── knight_rider.bin
-│   └── knight_rider.map
-├── Makefile
-├── build.sh
-├── requirements.txt
-└── README.md
-```
+## English
 
-## Tek Komutla Build
+An assembler and linker written in C for RV32I programs, with PicoRV32-oriented memory output and a Flask interface.
+
+### Features
+
+- Assembly parsing and instruction encoding, object files and symbol resolution.
+- Relocation handling and configurable text/data/stack addresses.
+- Command-line build, regression programs and a local web interface.
+
+### Getting started
+
+Use the repository build script with a C toolchain and Make installed.
 
 ```bash
+git clone https://github.com/talhacaglar/rv32i-assembler-linker.git
+cd rv32i-assembler-linker
 bash build.sh
-```
-
-## Manuel Kullanim
-
-```bash
-# Derle
-make all
-
-# Assemble
-cd test_programs
-../assembler_bin main.s utils.s
-
-# Link
-../linker_bin main.o utils.o \
-    -o ../output/knight_rider \
-    --text-base 00000000 \
-    --data-base 00010000 \
-    --stack-top 00020000
-```
-
-## Test
-
-```bash
-make all
 python3 tests/run_tests.py
 ```
 
-Testler assembler/linker cikis durumuna ek olarak string direktiflerini,
-`.data` yerlesimini ve ABS32 data relocation sonucunu da kontrol eder.
+For the GUI: create a virtual environment, install `requirements.txt`, then run `python gui/app.py`. See the reference for supported instructions, object format, relocation types, memory map and FPGA integration.
 
-## GUI
+[Detailed technical reference](REFERENCE.md)
+
+## Türkçe
+
+RV32I programları için C ile yazılmış assembler ve linker; PicoRV32 odaklı bellek çıktıları ve Flask arayüzü sunar.
+
+### Özellikler
+
+- Assembly ayrıştırma ve komut kodlama, object dosyaları ve sembol çözümleme.
+- Relocation işleme ve ayarlanabilir text/data/stack adresleri.
+- Komut satırı derlemesi, regresyon programları ve yerel web arayüzü.
+
+### Başlangıç
+
+C araç zinciri ve Make kurulu bir ortamda deponun derleme betiğini kullanın.
 
 ```bash
-python3 -m venv venv
-./venv/bin/pip install -r requirements.txt
-./venv/bin/python gui/app.py
+git clone https://github.com/talhacaglar/rv32i-assembler-linker.git
+cd rv32i-assembler-linker
+bash build.sh
+python3 tests/run_tests.py
 ```
 
-## Desteklenen Komutlar (RV32I)
+GUI için sanal ortam oluşturun, `requirements.txt` bağımlılıklarını kurun ve `python gui/app.py` çalıştırın. Desteklenen komutlar, object biçimi, relocation türleri, bellek haritası ve FPGA entegrasyonu referanstadır.
 
-R-type : add, sub, sll, slt, sltu, xor, srl, sra, or, and
-I-type : addi, slti, sltiu, xori, ori, andi, slli, srli, srai
-Load   : lw, lh, lb, lhu, lbu
-Store  : sw, sh, sb
-Branch : beq, bne, blt, bge, bltu, bgeu
-Upper  : lui, auipc
-Jump   : jal, jalr
-System : ecall, ebreak, fence
-Pseudo : nop, li, mv, la, call, ret, j, not, neg,
-         beqz, bnez, blez, bgez, bltz, bgtz, seqz, snez
-
-## Object Dosya Formati (.o)
-
-JSON formatinda, su alanlari icerir:
-- filename  : kaynak dosya adi
-- text      : 32-bit instruction kelimeleri (uint dizisi)
-- data      : data bolumu (byte dizisi)
-- symbols   : sembol tablosu {isim: {section, offset, global}}
-- relocations : relocation kayitlari
-- globals   : global sembol isimleri
-
-## Relocation Tipleri
-
-BRANCH     : B-type PC-relative dal
-JAL        : J-type PC-relative atlama
-CALL       : auipc+jalr cifti (call pseudo)
-LA         : auipc+addi cifti (la pseudo)
-LI         : lui+addi cifti (buyuk sabite)
-HI20       : U-type upper 20 bit
-LO12       : I-type lower 12 bit
-PCREL_HI20 : auipc icin upper 20 bit
-ABS32      : data section'da 32-bit mutlak adres
-
-## Bellek Haritasi (PicoRV32)
-
-0x00000000 - 0x0000FFFF : TEXT (BRAM, program kodu)
-0x00010000 - 0x0001FFFF : DATA/BSS (RAM)
-0x00020000              : STACK_TOP
-0x10000000              : GPIO / LED (memory-mapped)
-
-## FPGA Yukleme
-
-knight_rider.mem dosyasini Verilog'da kullan:
-
-```verilog
-reg [31:0] bram [0:16383]; // 64KB BRAM
-initial $readmemh("knight_rider.mem", bram);
-```
-
-`.mem` dosyasi `$readmemh` adres direktifleri (`@...`) kullanarak TEXT ve
-DATA bolumlerini ilgili word adreslerine yerlestirir.
-
-LED GPIO yazmaci 0x10000000 adresinde,
-main.s'deki `sw t2, 0(t1)` komutuyla yazilir.
+[Ayrıntılı teknik referans](REFERENCE.md)
